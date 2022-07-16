@@ -1,17 +1,19 @@
 <template>
   <div>
-    <h2 class="my-4">
-      所有評論：
-    </h2>
+    <h2 class="my-4">所有評論：</h2>
 
     <div v-for="comment in restaurantComments" :key="comment.id">
       <blockquote class="blockquote mb-0">
-        <button v-if="currentUser.isAdmin" @click.stop.prevent="handleDeleteButtonClick(comment.id)" type="button"
-          class="btn btn-danger float-right">
+        <button
+          v-if="currentUser.isAdmin"
+          @click.stop.prevent="handleDeleteButtonClick(comment.id)"
+          type="button"
+          class="btn btn-danger float-right"
+        >
           Delete
         </button>
         <h3>
-          <router-link :to="{ name: 'user'}">
+          <router-link :to="{ name: 'user' }">
             {{ comment.User.name }}
           </router-link>
         </h3>
@@ -20,43 +22,43 @@
           {{ comment.createdAt | fromNow }}
         </footer>
       </blockquote>
-      <hr>
+      <hr />
     </div>
   </div>
 </template>
 
 <script>
-import { fromNowFilter } from '../utils/mixins'
+import { fromNowFilter } from "../utils/mixins";
 
 const dummyUser = {
   currentUser: {
     id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
+    name: "管理者",
+    email: "root@example.com",
+    image: "https://i.pravatar.cc/300",
+    isAdmin: true,
   },
-  isAuthenticated: true
-}
+  isAuthenticated: true,
+};
 
 export default {
   props: {
     restaurantComments: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
-  data () {
+  data() {
     return {
-      currentUser: dummyUser.currentUser
-    }
+      currentUser: dummyUser.currentUser,
+    };
   },
   mixins: [fromNowFilter],
   methods: {
-    handleDeleteButtonClick (commentId) {
-      console.log('handleDeleteButtonClick', commentId)
-      this.$emit('after-delete-comment', commentId)
-    }
-  }
-}
+    handleDeleteButtonClick(commentId) {
+      console.log("handleDeleteButtonClick", commentId);
+      this.$emit("after-delete-comment", commentId);
+    },
+  },
+};
 </script>

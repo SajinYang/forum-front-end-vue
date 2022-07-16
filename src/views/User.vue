@@ -2,7 +2,7 @@
 <template>
   <div class="container py-5">
     <!-- UserProfileCard -->
-    <UserProfileCard :user="user" :initialIsFollowed="isFollowed" />
+    <UserProfileCard :user="user" :initialIsFollowed="isFollowed" :currentUser="user" />
 
     <div class=" row">
       <div class="col-md-4">

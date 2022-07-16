@@ -2,7 +2,7 @@
   <div class="card mb-3">
     <div class="row no-gutters">
       <div class="col-md-4">
-        <img :src="user.image" width="300px" height="300px">
+        <img :src="user.image | emptyImage" width="300px" height="300px">
       </div>
       <div class="col-md-8">
         <div class="card-body">
@@ -27,9 +27,9 @@
             </li>
           </ul>
           <template v-if="currentUser.id === user.id">
-            <a class="btn btn-primary">
+            <router-link :to="{ name: 'user-edit', params: { id: currentUser .id}}" class="btn btn-primary">
               Edit
-            </a>
+            </router-link>
           </template>
           <template v-else>
             <button v-if="isFollowed" @click.stop.prevent="deleteFollowing" class="btn btn-danger">
@@ -46,6 +46,8 @@
 </template>
 
 <script>
+import { emptyImageFilter } from './../utils/mixins'
+
 const dummyUser = {
   currentUser: {
     id: 1,
@@ -58,6 +60,7 @@ const dummyUser = {
 }
 
 export default {
+  mixins: [emptyImageFilter],
   props: {
     user: {
       type: Object,
@@ -84,3 +87,6 @@ export default {
   }
 }
 </script>
+
+
+

@@ -2,7 +2,7 @@
   <div class="card mb-3">
     <div class="row no-gutters">
       <div class="col-md-4">
-        <img :src="user.image | emptyImage" width="300px" height="300px">
+        <img :src="user.image | emptyImage" width="300px" height="300px" />
       </div>
       <div class="col-md-8">
         <div class="card-body">
@@ -26,16 +26,28 @@
               <strong>{{ user.followersLength }}</strong> followers (追隨者)
             </li>
           </ul>
-          <template v-if="currentUser.id === user.id">
-            <router-link :to="{ name: 'user-edit', params: { id: currentUser .id}}" class="btn btn-primary">
+          <template v-if="iscurrentUser">
+            <router-link
+              :to="{ name: 'user-edit', params: { id: user.id } }"
+              class="btn btn-primary"
+            >
               Edit
             </router-link>
           </template>
           <template v-else>
-            <button v-if="isFollowed" @click.stop.prevent="deleteFollowing" class="btn btn-danger">
+            <button
+              v-if="isFollowed"
+              @click.stop.prevent="deleteFollowing(user.id)"
+              class="btn btn-danger"
+            >
               取消追蹤
             </button>
-            <button v-else @click.stop.prevent="addFollowing" type="button" class="btn btn-primary">
+            <button
+              v-else
+              @click.stop.prevent="addFollowing(user.id)"
+              type="button"
+              class="btn btn-primary"
+            >
               追蹤
             </button>
           </template>
@@ -46,18 +58,20 @@
 </template>
 
 <script>
-import { emptyImageFilter } from './../utils/mixins'
+import { emptyImageFilter } from "./../utils/mixins";
+import users from "./../apis/users";
+import { Toast } from "../utils/helpers";
 
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
-  },
-  isAuthenticated: true
-}
+// const dummyUser = {
+//   currentUser: {
+//     id: 1,
+//     name: "管理者",
+//     email: "root@example.com",
+//     image: "https://i.pravatar.cc/300",
+//     isAdmin: true,
+//   },
+//   isAuthenticated: true,
+// };
 
 export default {
   mixins: [emptyImageFilter],
@@ -68,24 +82,59 @@ export default {
     },
     initialIsFollowed: {
       type: Boolean,
-      required: true
-    }    
+      required: true,
+    },
+    iscurrentUser: {
+      type: Boolean,
+      required: true,
+    },
   },
-  data () {
+  data() {
     return {
       isFollowed: this.initialIsFollowed,
-      currentUser: dummyUser.currentUser
-    }  
+      // currentUser: dummyUser.currentUser,
+    };
+  },
+  watch: {
+    initialIsFollowed(isFollowed) {
+      this.isFollowed = isFollowed;
+    },
   },
   methods: {
-    addFollowing () {
-      this.isFollowed = true
+    async addFollowing(userId) {
+      try {
+        const { data } = await users.addFollowing({ userId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.isFollowed = true;
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法加入追蹤，請重新再試",
+        });
+      }
     },
-    deleteFollowing () {
-      this.isFollowed = false
-    }
-  }
-}
+    async deleteFollowing(userId) {
+      try {
+        const { data } = await users.deleteFollowing({ userId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.isFollowed = false;
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法加入追蹤，請重新再試",
+        });
+      }
+    },
+  },
+};
 </script>
 
 

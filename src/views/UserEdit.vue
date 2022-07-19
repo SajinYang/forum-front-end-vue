@@ -3,77 +3,134 @@
     <form @submit.stop.prevent="handleSubmit">
       <div class="form-group">
         <label for="user.name">Name</label>
-        <input v-model="user.name" id="name" type="text" name="name" class="form-control" placeholder="Enter Name"
-          required>
+        <input
+          v-model="name"
+          id="name"
+          type="text"
+          name="name"
+          class="form-control"
+          placeholder="Enter Name"
+          required
+        />
       </div>
 
       <div class="form-group">
         <label for="user.image">Image</label>
-        <img v-if="user.image" :src="user.image" class="d-block img-thumbnail mb-3" width="200" height="200">
-        <input id="image" type="file" name="image" accept="image/*" class="form-control-file"
-          @change="handleFileChange">
+        <img
+          v-if="image"
+          :src="image"
+          class="d-block img-thumbnail mb-3"
+          width="200"
+          height="200"
+        />
+        <input
+          id="image"
+          type="file"
+          name="image"
+          accept="image/*"
+          class="form-control-file"
+          @change="handleFileChange"
+        />
       </div>
 
-      <button type="submit" class="btn btn-primary">
-        Submit
+      <button type="submit" class="btn btn-primary" :disabled="isProcessing">
+        {{ isProcessing ? "更新中.." : "Submit" }}
       </button>
     </form>
   </div>
 </template>
 
 <script>
-const dummyData = {
-  user: {
-      'id': 1,
-      'name': 'root',
-      'email': 'root@example.com',
-      'password': '$2a$10$OJ3jR93XlEMrQtYMWOIQh.EINWgaRFTXkd0Xi5OC/Vz4maztUXEPe',
-      'isAdmin': true,
-      'image': 'https://i.imgur.com/58ImzMM.png',
-  }
-}
+import usersAPI from "./../apis/users";
+import { mapState } from "vuex";
+import { Toast } from "../utils/helpers";
 
 export default {
-  data () {
+  data() {
     return {
-      user: {
-        id: -1,
-        name: '',
-        image: ''
-      }      
-    }
+      id: -1,
+      name: "",
+      image: "",
+      email: "",
+      isProcessing: false,
+    };
   },
-  created () {
-    const { id } = this.$route.params
-    this.fetchUser(id)
+  computed: {
+    ...mapState(["currentUser"]),
+  },
+  watch: {
+    currentUser() {
+      this.setUser();
+    },
+  },
+  created() {
+    const { id } = this.$route.params;
+    if (id.toString() !== this.currentUser.id.toString()) {
+      this.$router.push({ name: "not-found" });
+      return;
+    }
+    this.setUser();
+  },
+  beforeRouteUpdate(to) {
+    const { id } = to.params;
+    if (id.toString() !== this.currentUser.id.toString()) {
+      this.$router.push({ name: "not-found" });
+      return;
+    }
+    this.setUser();
   },
   methods: {
-    fetchUser (userId) {
-      console.log('userId:', userId)
-      const { user } = dummyData
-      this.user = {
-        ...this.user,
-        id: user.id,
-        name: user.name,
-        image: user.image,
-      }
+    setUser() {
+      this.id = this.currentUser.id;
+      this.name = this.currentUser.name;
+      this.email = this.currentUser.email;
+      this.image = this.currentUser.image;
     },
-    handleFileChange (e) {
-      const {files} = e.target
+    handleFileChange(e) {
+      const { files } = e.target;
       if (files.length === 0) {
-        this.user.image = ''      
+        this.image = "";
       } else {
-        const imageURL = window.URL.createObjectURL(files[0])
-        this.user.image = imageURL
+        const imageURL = window.URL.createObjectURL(files[0]);
+        this.image = imageURL;
       }
     },
-    handleSubmit(e) {
-      const form = e.target
-      const formData = new FormData(form)
-      for (let [name, value] of formData.entries()) {
-        console.log(name + ':' + value)
+    async handleSubmit(e) {
+      if (!this.name) {
+        Toast.fire({
+          icon: "warning",
+          title: "請填寫姓名欄位",
+        });
+        return;
       }
-    }
-  }
-}
+
+      const form = e.target;
+      const formData = new FormData(form);
+      for (let [name, value] of formData.entries()) {
+        console.log(name + ": " + value);
+      }
+
+      try {
+        this.isProcessing = true;
+
+        const { data } = await usersAPI.update({
+          userId: this.id,
+          formData,
+        });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.$router.push({ name: "user", params: { id: this.id } });
+      } catch (error) {
+        this.isProcessing = false;
+        Toast.fire({
+          icon: "error",
+          title: "無法更新使用者資訊，請稍後再試",
+        });
+      }
+    },
+  },
+};
 </script>

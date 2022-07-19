@@ -151,7 +151,7 @@ export default {
     async fetchCategories() {
       try {
         const { data } = await adminAPI.categories.get();
-        console.log(data);
+        // console.log(data);
 
         this.categories = data.categories;
         this.isLoading = false;

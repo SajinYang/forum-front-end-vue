@@ -1,22 +1,25 @@
 <template>
-  <div class="container py-5">
-    <!-- 餐廳資訊頁 RestaurantDetail -->
-    <RestaurantDetail
-      :initialRestaurant="restaurant"
-      :initialrestaurantComment="restaurantComment"
-    />
-    <hr />
-    <!-- 餐廳評論 RestaurantComments -->
-    <RestautantComments
-      :restaurant-comments="restaurantComment"
-      @after-delete-comment="afterDeleteComment"
-    />
+  <Spinner v-if="isLoading" />
+  <div v-else>
+    <div class="container py-5">
+      <!-- 餐廳資訊頁 RestaurantDetail -->
+      <RestaurantDetail
+        :initialRestaurant="restaurant"
+        :initialrestaurantComment="restaurantComment"
+      />
+      <hr />
+      <!-- 餐廳評論 RestaurantComments -->
+      <RestautantComments
+        :restaurant-comments="restaurantComment"
+        @after-delete-comment="afterDeleteComment"
+      />
 
-    <!-- 新增評論 CreateComment -->
-    <CreateComment
-      :restaurant-id="restaurant.id"
-      @after-create-comment="afterCreateComment"
-    />
+      <!-- 新增評論 CreateComment -->
+      <CreateComment
+        :restaurant-id="restaurant.id"
+        @after-create-comment="afterCreateComment"
+      />
+    </div>
   </div>
 </template>
 
@@ -27,12 +30,14 @@ import CreateComment from "./../components/CreateComment.vue";
 import restaurantsAPI from "./../apis/restaurants";
 import { Toast } from "../utils/helpers";
 import { mapState } from "vuex";
+import Spinner from "./../components/Spinner.vue";
 
 export default {
   components: {
     RestaurantDetail,
     RestautantComments,
     CreateComment,
+    Spinner,
   },
   data() {
     return {
@@ -50,6 +55,7 @@ export default {
       },
       restaurantComment: [],
       // currentUser: dummyUser.currentUser,
+      isLoading: true,
     };
   },
   created() {
@@ -87,7 +93,9 @@ export default {
         };
 
         this.restaurantComment = Comments;
+        this.isLoading = false;
       } catch (error) {
+        this.isLoading = false;
         Toast.fire({
           icon: "error",
           title: "無法取得餐廳資料，請稍後再試",

@@ -13,7 +13,8 @@ export default new Vuex.Store({
         image: '',
         isAdmin: false
       },
-      isAuthenticated: false
+      isAuthenticated: false,
+      token: ''
   },
   getters: {
   },
@@ -24,7 +25,14 @@ export default new Vuex.Store({
         ...status.currentUser,
         ...currentUser
       }
+      status.token = localStorage.getItem('token')
       status.isAuthenticated = true
+    },
+    revokeAuthentication (state) {
+      state.currentUser = {}
+      state.token = ''
+      state.isAuthenticated = false
+      localStorage.removeItem('token')
     }
   },
   // 透過API 取得資料 (由dispatch 發動 actions)
@@ -42,11 +50,12 @@ export default new Vuex.Store({
         commit('setCurrentUser', {
           id, name, email, image, isAdmin
         })
+        return true
       } catch (error) {
         console.error(error.message)
+        commit('revokeAuthentication')
+        return false
       }
     }
-  },
-  modules: {
   }
 })

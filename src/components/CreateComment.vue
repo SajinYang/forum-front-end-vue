@@ -1,5 +1,6 @@
 <template>
   <form @submit.stop.prevent="handleSubmit">
+    
     <div class="form-group mb-4">
       <label for="text">留下評論：</label>
       <textarea v-model="text" class="form-control" rows="3" name="text" />
@@ -75,3 +76,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.form-group {
+  margin: 21px 0 8px;
+}
+</style>
